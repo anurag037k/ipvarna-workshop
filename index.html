@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Contracts & IP Ownership Workshop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0f172a; --secondary: #334155; --accent: #4f46e5; --accent-hover: #4338ca; --success: #10b981; --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--secondary); line-height: 1.6; display: flex; justify-content: center; padding: 40px 20px; min-height: 100vh; align-items: flex-start; }
+        
+        .main-wrapper { max-width: 1000px; width: 100%; background: var(--card); border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; overflow: hidden; flex-direction: row; }
+        @media (max-width: 768px) { .main-wrapper { flex-direction: column; } }
+
+        .info-panel { background: var(--primary); color: white; padding: 40px; flex: 1; display: flex; flex-direction: column; }
+        .info-panel h1 { font-size: 26px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+        .info-panel .subtitle { font-size: 14px; color: #94a3b8; font-weight: 600; margin-bottom: 25px; letter-spacing: 0.5px; text-transform: uppercase; }
+        
+        .event-details { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); }
+        .event-details div { margin-bottom: 12px; display: flex; align-items: center; font-size: 14px; }
+        .event-details strong { color: #818cf8; width: 80px; }
+        
+        .collab-box { font-size: 13px; color: #cbd5e1; margin-bottom: auto; line-height: 1.6; }
+        
+        .pricing-tier { background: linear-gradient(135deg, var(--accent), #3730a3); padding: 20px; border-radius: 12px; text-align: center; margin-top: 30px; }
+        .pricing-tier h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; opacity: 0.9; }
+        .pricing-tier .price { font-size: 36px; font-weight: 800; }
+        .pricing-tier .seats { font-size: 13px; font-weight: 500; background: rgba(0,0,0,0.2); display: inline-block; padding: 4px 12px; border-radius: 20px; margin-top: 8px; }
+
+        .form-panel { padding: 40px; flex: 1.2; background: white; }
+        .form-panel h2 { color: var(--primary); font-size: 20px; margin-bottom: 25px; font-weight: 700; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .full-width { grid-column: span 2; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+        
+        label { display: block; font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 6px; }
+        input, select { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--primary); background: #f8fafc; transition: 0.2s; }
+        input:focus, select:focus { outline: none; border-color: var(--accent); background: white; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        .referral-group { display: flex; gap: 10px; }
+        .apply-btn { padding: 0 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .apply-btn:hover { background: #000; }
+        #refMessage { font-size: 13px; font-weight: 600; margin-top: 8px; display: none; }
+
+        .payment-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center; }
+        .qr-placeholder { width: 160px; height: 160px; background: white; border: 2px dashed #cbd5e1; margin: 0 auto 15px; border-radius: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .qr-placeholder img { width: 100%; height: 100%; object-fit: contain; }
+        .upi-id-box { background: white; border: 1px solid var(--border); display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; color: var(--primary); margin-bottom: 15px; }
+        .mobile-pay-btn { display: block; background: #10b981; color: white; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 16px; transition: 0.2s; }
+        .mobile-pay-btn:hover { background: #059669; }
+
+        .submit-btn { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .submit-btn:hover { background: var(--accent-hover); }
+        .submit-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper" id="mainWrapper">
+    <div class="info-panel">
+        <div>
+            <h1>Influencer Contracts & IP Ownership</h1>
+            <div class="subtitle">A Practical Playbook by Vidhiora × IPVarna</div>
+            
+            <div class="event-details">
+                <div><strong>Date:</strong> 27th September 2026</div>
+                <div><strong>Time:</strong> 4:00 PM – 7:00 PM (IST)</div>
+                <div><strong>Mode:</strong> Virtual (Link provided post-registration)</div>
+            </div>
+
+            <div class="collab-box">
+                <p style="margin-bottom: 10px;"><strong>What's Included:</strong></p>
+                <ul style="padding-left: 20px;">
+                    <li>Expert Workshop Curriculum by IPVarna</li>
+                    <li>Post-workshop Materials & Contract Drafts</li>
+                    <li>Official Participation Certificate</li>
+                </ul>
+            </div>
+        </div>
+        <div class="pricing-tier" id="priceBanner">
+            <h3>Registration Fee</h3>
+            <div class="price">₹<span id="displayPrice">1000</span></div>
+            <div class="seats" id="seatsText">Checking availability...</div>
+        </div>
+    </div>
+
+    <div class="form-panel">
+        <h2>Participant Registration</h2>
+        <form id="regForm">
+            <div class="form-grid">
+                <div class="full-width">
+                    <label>Full Legal Name (For Certificate)</label>
+                    <input type="text" name="fullName" required>
+                </div>
+                <div>
+                    <label>Email Address</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div>
+                    <label>Phone Number (WhatsApp)</label>
+                    <input type="tel" name="phone" required>
+                </div>
+                <div class="full-width">
+                    <label>Professional Category</label>
+                    <select name="profession" required>
+                        <option value="" disabled selected>Select your profile...</option>
+                        <option value="Content Creator / Influencer">Content Creator / Influencer</option>
+                        <option value="Influencer/Marketing Agency">Talent or Marketing Agency</option>
+                        <option value="In-house Brand Team">In-house Brand/Marketing Team</option>
+                        <option value="Law Student">Law Student</option>
+                        <option value="Young Lawyer">Lawyer (Media, Entertainment, or IP)</option>
+                        <option value="Platform Professional">Content Platform/MCN Professional</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="full-width">
+                    <label>Referral Code (Optional)</label>
+                    <div class="referral-group">
+                        <input type="text" id="referralInput" placeholder="Enter Code" style="text-transform: uppercase;">
+                        <button type="button" class="apply-btn" onclick="applyReferral()">Apply</button>
+                    </div>
+                    <div id="refMessage"></div>
+                    <input type="hidden" name="referralCode" id="finalReferralCode" value="NONE">
+                </div>
+            </div>
+
+            <div class="payment-box">
+                <h4 style="color: var(--primary); margin-bottom: 15px;">Secure Payment Gateway</h4>
+                <div class="qr-placeholder">
+                    <img src="qr.png" alt="Scan to Pay">
+                </div>
+                <div class="upi-id-box">UPI ID: anurag037k@ptyes</div>
+                <a href="#" id="upiBtn" class="mobile-pay-btn">Pay ₹<span class="payAmountBtn">1000</span> via Mobile App</a>
+                <div style="font-size: 12px; color: #64748b; margin-top: 8px;">*Fees are strictly non-refundable as per event policy.</div>
+            </div>
+
+            <div class="full-width" style="margin-bottom: 25px;">
+                <label>Payment Reference Number (12-Digit UTR)</label>
+                <input type="text" name="transactionId" placeholder="e.g. 312345678901" required maxlength="12">
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">Complete Registration & Verify</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let basePrice = 1000;
+    let finalPrice = 1000;
+    let activeCodes = [];
+
+    async function init() {
+        try {
+            const res = await fetch('/api/event-status');
+            const data = await res.json();
+            
+            if(data.count >= data.limit) {
+                document.getElementById('mainWrapper').innerHTML = `
+                    <div style="padding: 60px; text-align: center; width: 100%;">
+                        <h1 style="color:#0f172a; margin-bottom:15px;">Registration Closed</h1>
+                        <p style="color:#64748b; font-size:16px;">All 100 seats for the IPVarna Workshop have been successfully filled.</p>
+                    </div>`;
+                return;
+            }
+            
+            let seatsLeft = data.limit - data.count;
+            document.getElementById('seatsText').innerText = `Only ${seatsLeft} Seats Remaining`;
+
+            activeCodes = data.referrals.map(ref => ref.code.toUpperCase());
+            updateCheckoutUI();
+        } catch (error) {
+            console.error("Failed to fetch event status");
+        }
+    }
+
+    function applyReferral() {
+        const inputField = document.getElementById('referralInput');
+        const code = inputField.value.trim().toUpperCase();
+        const msgBox = document.getElementById('refMessage');
+        const hiddenField = document.getElementById('finalReferralCode');
+
+        if (!code) {
+            msgBox.style.display = 'block'; msgBox.style.color = '#ef4444'; msgBox.innerText = 'Please enter a code first.';
+            return;
+        }
+
+        if (activeCodes.includes(code)) {
+            msgBox.style.display = 'block'; msgBox.style.color = '#10b981'; msgBox.innerText = '🎉 Code applied! 10% Discount unlocked.';
+            inputField.style.borderColor = '#10b981'; inputField.readOnly = true; hiddenField.value = code; 
+            finalPrice = Math.round(basePrice * 0.90);
+            updateCheckoutUI();
+        } else {
+            msgBox.style.display = 'block'; msgBox.style.color = '#ef4444'; msgBox.innerText = '❌ Invalid or inactive code.';
+            inputField.style.borderColor = '#ef4444'; hiddenField.value = 'NONE';
+            finalPrice = basePrice;
+            updateCheckoutUI();
+        }
+    }
+
+    function updateCheckoutUI() {
+        document.getElementById('displayPrice').innerText = finalPrice;
+        document.querySelector('.payAmountBtn').innerText = finalPrice;
+        document.getElementById('upiBtn').href = `upi://pay?pa=anurag037k@ptyes&pn=Vidhiora&am=${finalPrice}&cu=INR`;
+    }
+
+    document.getElementById('regForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true; btn.innerText = "Processing Details...";
+
+        const data = Object.fromEntries(new FormData(e.target).entries());
+
+        try {
+            const res = await fetch('/api/register', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            
+            if(result.success) {
+                document.getElementById('mainWrapper').innerHTML = `
+                    <div style="padding: 60px; text-align: center; width: 100%;">
+                        <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
+                        <h1 style="color:#10b981; margin-bottom:10px;">Registration Successful!</h1>
+                        <p style="color:#64748b; font-size:16px;">You are confirmed as <strong>Attendee #${result.registrationNumber}</strong>.</p>
+                        <p style="color:#64748b; font-size:14px; margin-top: 15px;">Our team will verify your payment UTR. You will be added to the official WhatsApp group shortly.</p>
+                    </div>`;
+            } else {
+                alert(result.message || "Failed to register.");
+                btn.disabled = false; btn.innerText = "Complete Registration & Verify";
+            }
+        } catch (error) {
+            alert("Network error occurred.");
+            btn.disabled = false; btn.innerText = "Complete Registration & Verify";
+        }
+    });
+
+    init();
+</script>
+</body>
+</html>

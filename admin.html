@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPVarna Workshop - Admin Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; margin: 0; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .header-flex h2 { color: #0f172a; margin: 0; }
+        .stat-badges { display: flex; gap: 10px; }
+        .stat-badge { background: #e0e7ff; color: #4338ca; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .revenue-badge { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab { padding: 12px 20px; cursor: pointer; font-weight: bold; color: #64748b; }
+        .tab.active { border-bottom: 3px solid #2563eb; color: #2563eb; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        th { background: #f8fafc; color: #475569; }
+        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; font-size: 12px; display: inline-block;}
+        .btn-green { background: #10b981; } .btn-orange { background: #f97316; } .btn-red { background: #ef4444; } .btn-blue { background: #2563eb; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .form-row input, .form-row select { padding: 10px; flex: 1; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-flex">
+        <h2>Vidhiora × IPVarna Control Panel</h2>
+        <div class="stat-badges">
+            <div class="stat-badge" id="seatCounter">Loading Seats...</div>
+            <div class="stat-badge revenue-badge" id="revenueCounter">Loading Revenue...</div>
+        </div>
+    </div>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('users')">Registrations</div>
+        <div class="tab" onclick="switchTab('referrals')">Referral Codes</div>
+    </div>
+
+    <div id="users" class="tab-content active">
+        <table>
+            <thead><tr><th>#</th><th>Name / Contact</th><th>Profession</th><th>Ref Code</th><th>Paid</th><th>UTR</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="userTable"></tbody>
+        </table>
+    </div>
+
+    <div id="referrals" class="tab-content">
+        <div class="form-row">
+            <select id="newType"><option value="Ambassador">Campus Ambassador</option><option value="Organization">Organization</option></select>
+            <input type="text" id="newName" placeholder="Full Name">
+            <input type="text" id="newCode" placeholder="Unique Code (e.g. CA01)">
+            <button class="btn btn-blue" onclick="addReferral()" style="padding: 10px 15px; font-size: 14px;">+ Add Entity</button>
+        </div>
+        <table>
+            <thead><tr><th>Type</th><th>Name</th><th>Code</th><th>Successful Uses</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="refTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    async function loadUsers() {
+        const res = await fetch('/api/admin/users');
+        const users = await res.json();
+        
+        let validSeats = users.filter(u => u.status !== 'Rejected').length;
+        document.getElementById('seatCounter').innerText = `${validSeats} / 100 Seats`;
+
+        let totalRevenue = users.filter(u => u.status === 'Confirmed').reduce((sum, u) => sum + (u.amountPaid || 0), 0);
+        let splitAmount = totalRevenue / 2;
+        
+        document.getElementById('revenueCounter').innerHTML = `
+            Total: ₹${totalRevenue} 
+            <span style="opacity:0.3; margin:0 8px;">|</span> 
+            Vidhiora: ₹${splitAmount} 
+            <span style="opacity:0.3; margin:0 8px;">|</span> 
+            IPVarna: ₹${splitAmount}
+        `;
+
+        const tbody = document.getElementById('userTable');
+        tbody.innerHTML = '';
+        
+        users.forEach(u => {
+            const isPending = u.status === 'Pending';
+            const isRejected = u.status === 'Rejected';
+            const isConfirmed = u.status === 'Confirmed';
+            
+            let statusColor = isPending ? '#f59e0b' : (isRejected ? '#ef4444' : '#10b981');
+            
+            let actionBtns = '';
+            if (isPending) {
+                actionBtns = `
+                    <button class="btn btn-green" onclick="approveUser('${u._id}')" style="margin-bottom: 5px;">Approve</button>
+                    <button class="btn btn-orange" onclick="rejectUser('${u._id}')" style="margin-bottom: 5px;">Reject</button><br>
+                `;
+            } else if (isConfirmed) {
+                actionBtns = `<span style="color:#10b981; font-weight:bold; display:block; margin-bottom:5px;">Approved ✓</span>`;
+            } else if (isRejected) {
+                actionBtns = `<span style="color:#ef4444; font-weight:bold; display:block; margin-bottom:5px;">Rejected ✕</span>`;
+            }
+            
+            actionBtns += `<button class="btn btn-red" style="font-size: 11px; padding: 4px 8px; margin-top: 5px;" onclick="deleteUser('${u._id}')">Remove Data</button>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${u.registrationNumber}</td>
+                    <td><strong>${u.fullName}</strong><br><small style="color:#64748b">${u.email}<br>${u.phone}</small></td>
+                    <td>${u.profession}</td>
+                    <td><strong style="color:#2563eb">${u.referralCode}</strong></td>
+                    <td><strong>₹${u.amountPaid}</strong></td>
+                    <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${u.transactionId}</code></td>
+                    <td style="color:${statusColor}; font-weight: bold;">${u.status}</td>
+                    <td>${actionBtns}</td>
+                </tr>`;
+        });
+    }
+
+    async function approveUser(id) {
+        if(confirm("Confirm payment received? This adds them to the revenue tracker.")) {
+            await fetch(`/api/admin/users/${id}/approve`, { method: 'POST' });
+            loadUsers();
+            loadReferrals();
+        }
+    }
+
+    async function rejectUser(id) {
+        if(confirm("REJECT this payment?")) {
+            await fetch(`/api/admin/users/${id}/reject`, { method: 'POST' });
+            loadUsers();
+            loadReferrals();
+        }
+    }
+
+    async function deleteUser(id) {
+        if(confirm("Completely REMOVE this registration?")) {
+            await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+            loadUsers();
+            loadReferrals();
+        }
+    }
+
+    async function loadReferrals() {
+        const res = await fetch('/api/admin/referrals');
+        const refs = await res.json();
+        const tbody = document.getElementById('refTable');
+        tbody.innerHTML = '';
+        refs.forEach(r => {
+            tbody.innerHTML += `
+                <tr style="opacity: ${r.isActive ? '1' : '0.5'}">
+                    <td>${r.type}</td>
+                    <td>${r.name}</td>
+                    <td><strong>${r.code}</strong></td>
+                    <td><strong>${r.totalUses}</strong> Referrals</td>
+                    <td style="color:${r.isActive ? '#10b981' : '#ef4444'}; font-weight:bold;">${r.isActive ? 'Active' : 'Inactive'}</td>
+                    <td><button class="btn ${r.isActive ? 'btn-red' : 'btn-green'}" style="padding: 8px 12px;" onclick="toggleStatus('${r._id}', ${!r.isActive})">${r.isActive ? 'Deactivate' : 'Activate'}</button></td>
+                </tr>`;
+        });
+    }
+
+    async function addReferral() {
+        const payload = { type: document.getElementById('newType').value, name: document.getElementById('newName').value, code: document.getElementById('newCode').value };
+        if(!payload.name || !payload.code) return alert("Fill all fields.");
+        const res = await fetch('/api/admin/referrals', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if((await res.json()).success) { document.getElementById('newName').value = ''; document.getElementById('newCode').value = ''; loadReferrals(); }
+    }
+
+    async function toggleStatus(id, isActive) {
+        await fetch(`/api/admin/referrals/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive }) });
+        loadReferrals();
+    }
+
+    loadUsers();
+    loadReferrals();
+</script>
+</body>
+</html>
